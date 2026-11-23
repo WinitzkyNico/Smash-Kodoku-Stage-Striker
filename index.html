@@ -506,6 +506,16 @@ $("createRoom").onclick=createRoom;
 $("copyLink").onclick=()=>navigator.clipboard.writeText(location.href).then(()=>setNotice("Room link copied. Send it to your opponent."));
 $("resetMatch").onclick=resetMatch;
 $("saveNames").onclick=saveNames;
+["p1","p2"].forEach(id=>{
+  $(id).addEventListener("change",saveNames);
+  $(id).addEventListener("keydown",event=>{
+    if(event.key==="Enter"){
+      event.preventDefault();
+      $(id).blur();
+      saveNames();
+    }
+  });
+});
 $("roleA").onclick=()=>setPlayerRole("A");
 $("roleB").onclick=()=>setPlayerRole("B");
 $("headsA").onclick=()=>callCoin("A","heads");
