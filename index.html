@@ -395,16 +395,20 @@ async function callCoin(p,side){
 async function chooseStage(stage){
   await changeState(()=>{
     if(state.banned.includes(stage)||state.picked)return;
-    if(state.phase==="g1strikes"){
-      if(!starters.includes(stage))return;
-      state.banned.push(stage);
-      addLog(player(state.currentTurn)+" banned "+stage+".");
-      if(state.strikeStep===0){
-        state.strikeStep=1;
-        state.currentTurn=other(state.coinWinner);
-      }else{
-        state.phase="g1pick";
-        state.currentTurn=state.coinWinner;
+   if(state.phase==="g1strikes"){
+  if(!starters.includes(stage))return;
+  state.banned.push(stage);
+  addLog(player(state.currentTurn)+" banned "+stage+".");
+
+  if(state.strikeStep===0){
+    state.strikeStep=1;
+    state.currentTurn=other(state.coinWinner);
+  }else if(state.strikeStep===1){
+    state.strikeStep=2;
+  }else{
+    state.phase="g1pick";
+    state.currentTurn=state.coinWinner;
+  }
       }
     }else if(state.phase==="g1pick"){
       const remaining=starters.filter(s=>!state.banned.includes(s));
