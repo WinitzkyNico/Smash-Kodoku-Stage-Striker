@@ -344,7 +344,7 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   let message="";
   if(state.phase==="coin")message="Both players must call heads or tails.";
   if(state.phase==="g1strikes"){
-    message=player(state.currentTurn)+" must ban "+(state.strikeStep===0?1:2)+" starter stage"+(state.strikeStep===0?"":"s")+".";
+    message=player(state.currentTurn)+" must "+(state.strikeStep===0?"ban 1 starter stage":state.strikeStep===1?"ban 2 starter stages":"ban 1 more starter stage")+".";
   }
   if(state.phase==="g1pick")message=player(state.currentTurn)+" chooses one of the two remaining starters.";
   if(state.phase==="strikes")message=player(state.currentTurn)+" must ban 3 stages.";
