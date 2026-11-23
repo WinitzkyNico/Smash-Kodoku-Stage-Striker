@@ -71,7 +71,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
       <h1>SMASH KODOKU</h1>
       <div class="sub">Interactive stage striking room</div>
     </div>
-    <span class="pill">Best of 3 · Standard DSR</span>
+    <span class="pill">Best of 3 · Repeat stages allowed</span>
   </div>
 
   <div class="notice" id="connection">Create a match room to begin. Share its link with your opponent.</div>
@@ -147,7 +147,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
           <div class="rule"><b>GAME 1</b>1 ban → 2 bans → pick</div>
           <div class="rule"><b>GAMES 2–3</b>Winner bans 3</div>
           <div class="rule"><b>COUNTERPICK</b>Loser chooses</div>
-          <div class="rule"><b>DSR</b>Enabled</div>
+          <div class="rule"><b>REPEAT STAGES</b>Allowed</div>
         </div>
         <p class="muted" style="font-size:12px;margin-bottom:0">Game 1 uses the five starters. Games 2 and 3 use all eight legal stages.</p>
       </div>
@@ -200,6 +200,7 @@ let localPlayer = null;
 function roleStorageKey(){return "smash-kodoku-role-"+roomCode;}
 function setPlayerRole(role){
   if(role!=="A"&&role!=="B")return;
+  if(state?.roleLocked)return;
   localPlayer=role;
   if(roomCode)localStorage.setItem(roleStorageKey(),role);
   render();
@@ -213,6 +214,7 @@ function initialState(){
     coinCalls:[null,null],
     coinResult:null,
     coinWinner:null,
+    roleLocked:false,
     currentTurn:null,
     strikeStep:0,
     banned:[],
@@ -356,8 +358,9 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("roleStatus").textContent=localPlayer
     ?"This device is set to "+player(localPlayer)+"."
     :"Choose which player you are using this device as.";
-  $("roleA").disabled=!roomCode;
-  $("roleB").disabled=!roomCode;
+  $("roleA").disabled=!roomCode||!!state.roleLocked;
+  $("roleB").disabled=!roomCode||!!state.roleLocked;
+  if(state.roleLocked) $("roleStatus").textContent="Player sides are locked for this match.";
   $("headsA").disabled=$("tailsA").disabled=!!state.coinCalls[0]||state.phase!=="coin"||localPlayer!=="A";
   $("headsB").disabled=$("tailsB").disabled=!!state.coinCalls[1]||state.phase!=="coin"||localPlayer!=="B";
   $("headsA").disabled=$("headsA").disabled||!roomCode;
@@ -411,6 +414,7 @@ async function callCoin(p,side){
     if(state.coinCalls[0]&&state.coinCalls[1]){
       state.coinResult=Math.random()<.5?"heads":"tails";
       state.coinWinner=state.coinCalls[0]===state.coinResult?"A":"B";
+      state.roleLocked=true;
       state.currentTurn=state.coinWinner;
       state.phase="g1strikes";
       addLog(state.coinResult.toUpperCase()+". "+player(state.coinWinner)+" wins the toss and bans one starter.");
@@ -450,7 +454,6 @@ async function chooseStage(stage){
         addLog(player(state.currentTurn)+" chooses from the remaining stages.");
       }
     }else if(state.phase==="pick"){
-      if(state.previousStages.includes(stage))return;
       state.picked=stage;state.phase="done";
       addLog(player(state.currentTurn)+" selected "+stage+".");
     }
@@ -466,7 +469,6 @@ async function recordWinner(winner){
       return;
     }
     state.lastWinner=winner;
-    state.previousStages.push(state.picked);
     state.game++;
     state.banned=[];
     state.picked=null;
