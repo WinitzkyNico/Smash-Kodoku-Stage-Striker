@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smash Kodoku #10 — Stage Striking</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#1a1c25;--panel2:#222532;--line:#35394a;--text:#f4f4f7;--muted:#a8adbd;--accent:#d8a84e;--red:#d65d66;--green:#65bd91}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#25202a 0,#101116 55%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:980px;margin:auto;padding:28px 18px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kicker{color:var(--accent);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px}
+h1{font-size:clamp(27px,5vw,42px);line-height:1.08;margin:6px 0}h2{font-size:19px;margin:0 0 12px}
+.sub{color:var(--muted);margin:8px 0 22px}.pill{border:1px solid var(--line);border-radius:999px;padding:6px 11px;color:var(--muted);font-size:12px}
+.notice{background:#292417;border:1px solid #6b542b;color:#f2dba9;padding:12px 14px;border-radius:12px;margin:18px 0}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.card{background:linear-gradient(160deg,var(--panel),#171922);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 10px 28px #0003}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input{width:100%;background:#11131a;color:var(--text);border:1px solid var(--line);padding:11px 12px;border-radius:9px;font:inherit}
+.players{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}
+.btn:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}.btn:disabled{opacity:.35;cursor:not-allowed}
+.primary{background:var(--accent);border-color:var(--accent);color:#17130b}.danger{border-color:#713c46;color:#ffb2b7}.small{font-size:12px;padding:7px 10px}
+.coin{width:112px;height:112px;border-radius:50%;border:5px solid #e8c36c;background:radial-gradient(circle at 35% 30%,#fff0b4,#c18a32 65%,#6d4517);color:#3a260d;font-size:28px;font-weight:950;display:grid;place-items:center;margin:10px auto 14px;box-shadow:0 5px 20px #0007,inset 0 0 0 3px #8b5e23}
+.coin.flip{animation:spin .7s ease-in-out}@keyframes spin{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(720deg) scale(1.08)}100%{transform:rotateY(1440deg) scale(1)}}
+.center{text-align:center}.muted{color:var(--muted)}.status{padding:10px 12px;background:#12141c;border-radius:10px;margin:10px 0;color:#e6d7b5}
+.stage-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stage{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#202330;border:1px solid var(--line);padding:10px;border-radius:10px;min-height:55px}
+.stage.banned{opacity:.45;border-style:dashed}.stage.picked{border-color:var(--green);background:#1c3029}
+.stage-name{font-weight:650}.tag{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.log{list-style:none;margin:0;padding:0}.log li{padding:8px 0;border-bottom:1px solid #303342;color:#d7d9e2;font-size:13px}
+.log li:last-child{border:0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hidden{display:none!important}.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rule{background:#12141c;border-radius:9px;padding:10px}.rule b{display:block;color:var(--accent);font-size:12px;margin-bottom:3px}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:12px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.stage-list{grid-template-columns:1fr}.rules{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body><main>
+<div class="top"><div><div class="kicker">Tournament tool · Parsec</div><h1>SMASH KODOKU <span style="color:var(--accent)">#10</span></h1><div class="sub">Interactive stage striking room</div></div><span class="pill">Best of 3 · Standard DSR</span></div>
+<div class="notice"><b>Prototype mode:</b> This page works in one browser and saves state locally. It is not yet synchronized between two players on separate devices. Do not use it as a live shared match room until hosted with a realtime backend.</div>
+<div class="grid">
+<section>
+<div class="card"><h2>1 · Players</h2><div class="players">
+<div><label for="p1">Player A</label><input id="p1" value="Player A"></div>
+<div><label for="p2">Player B</label><input id="p2" value="Player B"></div></div>
+<div class="actions"><button class="btn primary" id="newMatch">Start / reset match</button></div></div>
+<div class="card center"><h2>2 · Game 1 coin toss</h2><p class="muted">Players call heads or tails. The winner strikes first.</p>
+<div class="coin" id="coin">?</div>
+<div class="players"><button class="btn" id="heads">Heads</button><button class="btn" id="tails">Tails</button></div>
+<p id="coinResult" class="status">Choose heads or tails to flip the coin.</p></div>
+<div class="card"><div class="top"><h2>3 · Current game</h2><span class="pill" id="gameLabel">Game 1</span></div>
+<p id="turnText" class="status">Flip the coin to begin.</p><div id="stageList" class="stage-list"></div>
+<div class="actions"><button class="btn small" id="nextGame" disabled>Advance to next game</button><button class="btn small danger" id="undo">Undo last action</button></div></div>
+</section>
+<aside>
+<div class="card"><h2>Match rules</h2><div class="rules">
+<div class="rule"><b>GAME 1</b>1–2–1 strikes</div><div class="rule"><b>GAMES 2–3</b>Winner bans 3</div>
+<div class="rule"><b>COUNTERPICK</b>Loser chooses</div><div class="rule"><b>DSR</b>Enabled</div></div>
+<p class="muted" style="font-size:12px;margin:12px 0 0">Game 1 starters: Battlefield, Small Battlefield, Final Destination, Smashville, Pokémon Stadium 2.</p></div>
+<div class="card"><h2>Action history</h2><ul id="log" class="log"><li>Match ready. Enter player names and flip the coin.</li></ul></div>
+<div class="card"><h2>Stage pool</h2><div class="tag">Counterpicks used in games 2–3</div><p class="muted" style="font-size:13px;margin-bottom:0">Kalos Pokémon League · Hollow Bastion · Town &amp; City</p></div>
+<div class="card"><h2>Reset</h2><p class="muted" style="font-size:13px">Reset clears the local match history and stage state.</p><button class="btn danger" id="fullReset">Reset everything</button></div>
+</aside></div>
+<footer>Smash Kodoku #10 · Community tournament tool</footer></main>
+<script>
+const starters=["Battlefield","Small Battlefield","Final Destination","Smashville","Pokémon Stadium 2"];
+const counters=["Kalos Pokémon League","Hollow Bastion","Town & City"];
+let game=1, coinWinner=null, coinSide=null, actions=[], banned=[], picked=null, phase="coin", strikeStep=0, currentTurn=null, lastGameWinner=null, previousStages=[];
+const $=id=>document.getElementById(id);
+const name=p=>$(p==="A"?"p1":"p2").value.trim()||(p==="A"?"Player A":"Player B");
+function log(s){actions.push(s);renderLog()}
+function renderLog(){$("log").innerHTML=actions.length?actions.slice().reverse().map(x=>`<li>${esc(x)}</li>`).join(""):"<li>No actions yet.</li>"}
+function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function pool(){return game===1?starters:[...starters,...counters]}
+function bannedCount(){return banned.length}
+function activePlayer(){return currentTurn}
+function render(){
+ $("gameLabel").textContent="Game "+game;
+ $("turnText").textContent=phase==="coin"?"Flip the coin to begin.":phase==="strike"?`${name(currentTurn)}: ban ${game===1?[1,2,1][strikeStep]:3} stage${(game===1?[1,2,1][strikeStep]:3)>1?"s":""}.`:phase==="pick"?`${name(currentTurn)}: choose a legal counterpick.`:phase==="done"?`Stage selected: ${picked}.`:"Match complete.";
+ $("stageList").innerHTML=pool().map(s=>{let state=banned.includes(s)?"banned":picked===s?"picked":"";
+ let can=phase==="strike"&&currentTurn||phase==="pick"&&currentTurn;
+ let label=state==="banned"?"BANNED":state==="picked"?"SELECTED":phase==="strike"?"Ban":phase==="pick"?"Pick":"—";
+ let disabled=!can||!!state||(phase==="pick"&&game>1&&!counters.includes(s)&&!starters.includes(s))||(phase==="pick"&&previousStages.includes(s));
+ return `<div class="stage ${state}"><div><div class="stage-name">${esc(s)}</div><div class="tag">${state||"stage"}</div></div><button class="btn small ${phase==="pick"?"primary":"danger"}" ${disabled?"disabled":""} data-stage="${esc(s)}">${label}</button></div>`}).join("");
+ $("stageList").querySelectorAll("button[data-stage]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.stage)));
+ $("nextGame").disabled=!(phase==="done"&&game<3);
+ $("heads").disabled=$("tails").disabled=phase!=="coin";
+}
+function act(stage){
+ if(phase==="strike"){
+  const needed=game===1?[1,2,1][strikeStep]:3;
+  if(banned.includes(stage)||banned.length>=needed+(game===1?0:0))return;
+  banned.push(stage);log(`${name(currentTurn)} banned ${stage}.`);
+  if(game===1){let count=[1,2,1][strikeStep];let totalForTurn=actions.filter(x=>x.startsWith(name(currentTurn)+" banned ")).length;let expected=count;
+    let made=0;for(let i=actions.length-1;i>=0&&actions[i].startsWith(name(currentTurn)+" banned ");i--)made++;
+    if(made>=expected){strikeStep++;if(strikeStep===3){let remain=starters.filter(s=>!banned.includes(s));if(remain.length===1){picked=remain[0];phase="done";log(`${picked} is the remaining starter and is selected.`)}else{phase="done";picked=remain[0];log(`${picked} selected as remaining starter.`)}}else currentTurn=coinWinner==="A"?(strikeStep===1?"B":"A"):(strikeStep===1?"A":"B");}
+  }else{if(banned.length===3){phase="pick";currentTurn=lastGameWinner==="A"?"B":"A";log(`${name(currentTurn)} chooses a counterpick.`)}}
+ }else if(phase==="pick"){
+  if(previousStages.includes(stage)){alert("DSR: this stage was already played and cannot be selected.");return}
+  picked=stage;phase="done";log(`${name(currentTurn)} selected ${stage}.`);
+ }
+ render();
+}
+function toss(side){
+ if(phase!=="coin")return;
+ coinSide=side;let result=Math.random()<.5?"heads":"tails";coinWinner=result===side?"A":"B";
+ $("coin").textContent=result.toUpperCase();$("coin").classList.remove("flip");void $("coin").offsetWidth;$("coin").classList.add("flip");
+ $("coinResult").textContent=`${result.toUpperCase()}! ${name(coinWinner)} wins the toss and strikes first.`;
+ currentTurn=coinWinner;phase="strike";strikeStep=0;log(`Coin toss: ${result}. ${name(coinWinner)} wins and strikes first.`);render();
+}
+function resetGame(n){game=n;banned=[];picked=null;strikeStep=0;phase="strike";currentTurn=lastGameWinner;render();log(`Game ${game}: ${name(lastGameWinner)} bans three stages.`)}
+$("heads").onclick=()=>toss("heads");$("tails").onclick=()=>toss("tails");
+$("newMatch").onclick=()=>{game=1;coinWinner=null;coinSide=null;actions=[];banned=[];picked=null;phase="coin";strikeStep=0;currentTurn=null;lastGameWinner=null;previousStages=[];$("coin").textContent="?";$("coinResult").textContent="Choose heads or tails to flip the coin.";renderLog();render()};
+$("nextGame").onclick=()=>{if(phase!=="done"||game>=3)return;previousStages.push(picked);let winner=prompt("Who won Game "+game+"? Enter A or B.");if(!winner||!["A","B"].includes(winner.trim().toUpperCase()))return;lastGameWinner=winner.trim().toUpperCase();resetGame(game+1)};
+$("undo").onclick=()=>{if(!actions.length)return;actions.pop();alert("History entry removed. For a fully consistent reset after an incorrect action, use Start / reset match.");renderLog()};
+$("fullReset").onclick=()=>$("newMatch").click();
+render();
+</script></body></html>
