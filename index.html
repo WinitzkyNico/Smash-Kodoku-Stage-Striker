@@ -372,7 +372,7 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   }
   if(state.phase==="g1pick")message=player(state.currentTurn)+" chooses one of the two remaining starters.";
   if(state.phase==="strikes")message=player(state.currentTurn)+" must ban 3 stages.";
-  if(state.phase==="pick")message=player(state.currentTurn)+" chooses a stage. Previously selected stages are blocked by DSR.";
+  if(state.phase==="pick")message=player(state.currentTurn)+" chooses a stage.";
   if(state.phase==="done")message="Selected stage: "+state.picked+". Record the game winner below.";
   if(state.phase==="complete")message="Match complete!";
   $("turnText").textContent=message;
@@ -381,7 +381,7 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("stageList").innerHTML=stages.filter(s=>available.includes(s.name)).map(s=>{
     const banned=state.banned.includes(s.name);
     const picked=state.picked===s.name;
-    const blocked=state.phase==="pick"&&state.previousStages.includes(s.name);
+    const blocked=false;
     const active=["g1strikes","g1pick","strikes","pick"].includes(state.phase);
     const isBan=["g1strikes","strikes"].includes(state.phase);
     const disabled=!active||localPlayer!==state.currentTurn||banned||picked||blocked;
