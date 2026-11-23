@@ -71,13 +71,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
       <h1>SMASH KODOKU</h1>
       <div class="sub">Interactive stage striking room</div>
     </div>
-    <span class="pill">Best of 3 · Repeat stages allowed</span>
+    <span class="pill" id="headerFormat">Best of 3 · Repeat stages allowed</span>
   </div>
 
   <div class="notice" id="connection">Create a match room to begin. Share its link with your opponent.</div>
 
   <div class="card">
     <h2>Match room</h2>
+    <div style="max-width:260px;margin:0 0 12px"><label for="bestOf">Match format</label><select id="bestOf" class="btn" style="width:100%"><option value="3" selected>Best of 3</option><option value="5">Best of 5</option></select><p class="muted" style="font-size:12px;margin:5px 0 0">Choose before creating the room. The format is shared with both players.</p></div>
     <div class="actions">
       <button class="btn primary" id="createRoom">Create new room</button>
       <button class="btn" id="copyLink" disabled>Copy room link</button>
@@ -144,12 +145,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
       <div class="card">
         <h2>Match rules</h2>
         <div class="rules">
+          <div class="rule"><b>MATCH FORMAT</b><span id="formatLabel">Best of 3</span></div>
+          <div class="rule"><b>SERIES SCORE</b><span id="seriesScore">0 – 0</span></div>
           <div class="rule"><b>GAME 1</b>1 ban → 2 bans → pick</div>
-          <div class="rule"><b>GAMES 2–3</b>Winner bans 3</div>
+          <div class="rule"><b>GAMES 2–5</b>Winner bans 3</div>
           <div class="rule"><b>COUNTERPICK</b>Loser chooses</div>
           <div class="rule"><b>REPEAT STAGES</b>Allowed</div>
         </div>
-        <p class="muted" style="font-size:12px;margin-bottom:0">Game 1 uses the five starters. Games 2 and 3 use all eight legal stages.</p>
+        <p class="muted" style="font-size:12px;margin-bottom:0">Game 1 uses the five starters. Games 2 onward use all eight legal stages.</p>
       </div>
 
       <div class="card">
@@ -226,6 +229,8 @@ function initialState(){
   return {
     players:["Player A","Player B"],
     game:1,
+    bestOf:Number($("bestOf").value)||3,
+    wins:[0,0],
     phase:"coin",
     coinCalls:[null,null],
     coinResult:null,
@@ -374,7 +379,14 @@ if(document.activeElement.id !== "p1") $("p1").value=state.players[0];
 if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("callA").textContent=player("A");
   $("callB").textContent=player("B");
-  $("gameLabel").textContent="Game "+state.game;
+  state.bestOf=state.bestOf||3;
+  state.wins=state.wins||[0,0];
+  $("bestOf").value=String(state.bestOf);
+  $("bestOf").disabled=!!roomCode;
+  $("headerFormat").textContent="Best of "+state.bestOf+" · Repeat stages allowed";
+  $("formatLabel").textContent="Best of "+state.bestOf;
+  $("seriesScore").textContent=state.wins[0]+" – "+state.wins[1];
+  $("gameLabel").textContent="Game "+state.game+" of "+state.bestOf;
   $("coin").textContent=state.coinResult?state.coinResult.toUpperCase():"?";
   $("coinResult").textContent=state.coinWinner
     ?state.coinResult.toUpperCase()+"! "+player(state.coinWinner)+" wins the toss."
@@ -492,9 +504,11 @@ async function recordWinner(winner){
   await changeState(()=>{
     if(state.phase!=="done")return;
     addLog(player(winner)+" won Game "+state.game+".");
-    if(state.game===3){
+    state.wins=state.wins||[0,0];
+    state.wins[winner==="A"?0:1]++;
+    if(state.wins[winner==="A"?0:1]>=Math.ceil((state.bestOf||3)/2)){
       state.phase="complete";
-      addLog("Match complete!");
+      addLog(player(winner)+" wins the match "+state.wins[0]+"–"+state.wins[1]+"!");
       return;
     }
     state.lastWinner=winner;
