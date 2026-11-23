@@ -268,7 +268,7 @@ async function joinRoom(room,token){
     const data=await rpc("smash_get_match",{
       p_room_code:roomCode,p_access_token:accessToken
     });
-    state=Array.isArray(data)?data[0]?.state:data?.state;
+    state=Array.isArray(data)?(data[0]?.state??data[0]):(data?.state??data);
     if(!state)throw new Error("Room not found.");
     afterConnect();
     setNotice("Connected to room "+roomCode+". Match updates are shared.");
@@ -289,7 +289,7 @@ async function fetchState(){
   const data=await rpc("smash_get_match",{
     p_room_code:roomCode,p_access_token:accessToken
   });
-  return Array.isArray(data)?data[0]?.state:data?.state;
+  return Array.isArray(data)?(data[0]?.state??data[0]):(data?.state??data);
 }
 async function saveState(){
   await rpc("smash_update_match",{
@@ -409,7 +409,6 @@ async function chooseStage(stage){
     state.phase="g1pick";
     state.currentTurn=state.coinWinner;
   }
-      }
     }else if(state.phase==="g1pick"){
       const remaining=starters.filter(s=>!state.banned.includes(s));
       if(!remaining.includes(stage))return;
