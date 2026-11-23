@@ -298,7 +298,8 @@ async function createRoom(){
       p_room_code:roomCode,p_access_token:accessToken,p_state:state
     });
     history.replaceState(null,"",location.pathname+"#room="+roomCode+"&token="+accessToken);
-    setPlayerRole("A");
+    localPlayer="A";
+    localStorage.setItem(roleStorageKey(),"A");
     afterConnect();
     setNotice("Room created. Copy the room link and send it to your opponent.");
     render();
