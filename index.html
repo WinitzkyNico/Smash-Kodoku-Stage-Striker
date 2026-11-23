@@ -198,12 +198,28 @@ let polling = null;
 let busy = false;
 let localPlayer = null;
 function roleStorageKey(){return "smash-kodoku-role-"+roomCode;}
-function setPlayerRole(role){
+function deviceKey(){return "smash-kodoku-device-id";}
+function getDeviceId(){
+  let id=localStorage.getItem(deviceKey());
+  if(!id){id=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(x=>x.toString(16).padStart(2,"0")).join("");localStorage.setItem(deviceKey(),id);}
+  return id;
+}
+async function setPlayerRole(role){
   if(role!=="A"&&role!=="B")return;
-  if(state?.roleLocked)return;
-  localPlayer=role;
-  if(roomCode)localStorage.setItem(roleStorageKey(),role);
-  render();
+  if(state?.roleLocked||!roomCode||busy)return;
+  const device=getDeviceId();
+  await changeState(()=>{
+    state.roleClaims=state.roleClaims||{A:null,B:null};
+    const otherRole=role==="A"?"B":"A";
+    if(state.roleClaims[role]&&state.roleClaims[role]!==device){
+      setNotice("Player "+role+" is already assigned to another device.",true);
+      return;
+    }
+    if(state.roleClaims[otherRole]===device)state.roleClaims[otherRole]=null;
+    state.roleClaims[role]=device;
+    localPlayer=role;
+    localStorage.setItem(roleStorageKey(),role);
+  });
 }
 
 function initialState(){
@@ -215,6 +231,7 @@ function initialState(){
     coinResult:null,
     coinWinner:null,
     roleLocked:false,
+    roleClaims:{A:null,B:null},
     currentTurn:null,
     strikeStep:0,
     banned:[],
@@ -271,6 +288,7 @@ async function createRoom(){
     ];
     state=initialState();
     state.players=enteredNames;
+    state.roleClaims.A=getDeviceId();
     await rpc("smash_create_match",{
       p_room_code:roomCode,p_access_token:accessToken,p_state:state
     });
@@ -293,8 +311,10 @@ async function joinRoom(room,token){
     state=Array.isArray(data)?(data[0]?.state??data[0]):(data?.state??data);
     if(!state)throw new Error("Room not found.");
     const savedRole=localStorage.getItem(roleStorageKey());
-    setPlayerRole(savedRole==="A"||savedRole==="B"?savedRole:"B");
+    localPlayer=null;
     afterConnect();
+    if(savedRole==="A"||savedRole==="B") await setPlayerRole(savedRole);
+    else render();
     setNotice("Connected to room "+roomCode+". Match updates are shared.");
     render();startPolling();
     return true;
@@ -364,9 +384,12 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("roleStatus").textContent=localPlayer
     ?"This device is set to "+player(localPlayer)+"."
     :"Choose which player you are using this device as.";
-  $("roleA").disabled=!roomCode||!!state.roleLocked;
-  $("roleB").disabled=!roomCode||!!state.roleLocked;
+  state.roleClaims=state.roleClaims||{A:null,B:null};
+  const thisDevice=getDeviceId();
+  $("roleA").disabled=!roomCode||!!state.roleLocked||!!(state.roleClaims.A&&state.roleClaims.A!==thisDevice);
+  $("roleB").disabled=!roomCode||!!state.roleLocked||!!(state.roleClaims.B&&state.roleClaims.B!==thisDevice);
   if(state.roleLocked) $("roleStatus").textContent="Player sides are locked for this match.";
+  else if(!localPlayer) $("roleStatus").textContent="Choose an unassigned player side on this device.";
   $("headsA").disabled=$("tailsA").disabled=!!state.coinCalls[0]||state.phase!=="coin"||localPlayer!=="A";
   $("headsB").disabled=$("tailsB").disabled=!!state.coinCalls[1]||state.phase!=="coin"||localPlayer!=="B";
   $("headsA").disabled=$("headsA").disabled||!roomCode;
