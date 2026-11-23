@@ -265,7 +265,12 @@ async function createRoom(){
       .map(x=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[x%32]).join("");
     accessToken=Array.from(crypto.getRandomValues(new Uint8Array(32)))
       .map(x=>x.toString(16).padStart(2,"0")).join("");
+    const enteredNames=[
+      $("p1").value.trim()||"Player A",
+      $("p2").value.trim()||"Player B"
+    ];
     state=initialState();
+    state.players=enteredNames;
     await rpc("smash_create_match",{
       p_room_code:roomCode,p_access_token:accessToken,p_state:state
     });
@@ -480,6 +485,7 @@ async function recordWinner(winner){
   });
 }
 async function saveNames(){
+  if(!roomCode||!state)return;
   const a=$("p1").value.trim()||"Player A";
   const b=$("p2").value.trim()||"Player B";
   await changeState(()=>{
