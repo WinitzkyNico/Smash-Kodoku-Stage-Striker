@@ -403,12 +403,12 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("roleB").disabled=!roomCode||!!state.roleLocked||!!(state.roleClaims.B&&state.roleClaims.B!==thisDevice);
   if(state.roleLocked) $("roleStatus").textContent="Player sides are locked for this match.";
   else if(!localPlayer) $("roleStatus").textContent="Choose an unassigned player side on this device.";
-  $("headsA").disabled=$("tailsA").disabled=!!state.coinCalls[0]||state.phase!=="coin"||localPlayer!=="A";
-  $("headsB").disabled=$("tailsB").disabled=!!state.coinCalls[1]||state.phase!=="coin"||localPlayer!=="B";
-  $("headsA").disabled=$("headsA").disabled||!roomCode;
-  $("tailsA").disabled=$("tailsA").disabled||!roomCode;
-  $("headsB").disabled=$("headsB").disabled||!roomCode;
-  $("tailsB").disabled=$("tailsB").disabled||!roomCode;
+  const callA=state.coinCalls[0], callB=state.coinCalls[1];
+  const coinActive=state.phase==="coin";
+  $("headsA").disabled=!roomCode||!coinActive||localPlayer!=="A"||!!callA||callB==="heads";
+  $("tailsA").disabled=!roomCode||!coinActive||localPlayer!=="A"||!!callA||callB==="tails";
+  $("headsB").disabled=!roomCode||!coinActive||localPlayer!=="B"||!!callB||callA==="heads";
+  $("tailsB").disabled=!roomCode||!coinActive||localPlayer!=="B"||!!callB||callA==="tails";
 
   let message="";
   if(state.phase==="coin")message="Both players must call heads or tails.";
