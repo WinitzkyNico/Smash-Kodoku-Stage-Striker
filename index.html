@@ -325,8 +325,8 @@ function addLog(message){
 }
 function render(){
   if(!state)return;
-  $("p1").value=state.players[0];
-  $("p2").value=state.players[1];
+if(document.activeElement.id !== "p1") $("p1").value=state.players[0];
+if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("callA").textContent=player("A");
   $("callB").textContent=player("B");
   $("gameLabel").textContent="Game "+state.game;
