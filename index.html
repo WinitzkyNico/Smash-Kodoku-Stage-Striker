@@ -344,6 +344,7 @@ function addLog(message){
 }
 function render(){
   if(!state)return;
+  if(state.phase!=="coin") state.roleLocked=true;
 if(document.activeElement.id !== "p1") $("p1").value=state.players[0];
 if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("callA").textContent=player("A");
