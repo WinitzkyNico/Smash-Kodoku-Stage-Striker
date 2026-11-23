@@ -1,113 +1,482 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Smash Kodoku — Stage Striking</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smash Kodoku</title>
 <style>
-:root{color-scheme:dark;--bg:#101116;--panel:#1a1c25;--panel2:#222532;--line:#35394a;--text:#f4f4f7;--muted:#a8adbd;--accent:#d8a84e;--red:#d65d66;--green:#65bd91}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#25202a 0,#101116 55%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
-main{max-width:980px;margin:auto;padding:28px 18px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.kicker{color:var(--accent);font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px}
-h1{font-size:clamp(27px,5vw,42px);line-height:1.08;margin:6px 0}h2{font-size:19px;margin:0 0 12px}
-.sub{color:var(--muted);margin:8px 0 22px}.pill{border:1px solid var(--line);border-radius:999px;padding:6px 11px;color:var(--muted);font-size:12px}
-.notice{background:#292417;border:1px solid #6b542b;color:#f2dba9;padding:12px 14px;border-radius:12px;margin:18px 0}
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.card{background:linear-gradient(160deg,var(--panel),#171922);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 10px 28px #0003}
-label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}input{width:100%;background:#11131a;color:var(--text);border:1px solid var(--line);padding:11px 12px;border-radius:9px;font:inherit}
-.players{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}
-.btn:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}.btn:disabled{opacity:.35;cursor:not-allowed}
-.primary{background:var(--accent);border-color:var(--accent);color:#17130b}.danger{border-color:#713c46;color:#ffb2b7}.small{font-size:12px;padding:7px 10px}
-.coin{width:112px;height:112px;border-radius:50%;border:5px solid #e8c36c;background:radial-gradient(circle at 35% 30%,#fff0b4,#c18a32 65%,#6d4517);color:#3a260d;font-size:28px;font-weight:950;display:grid;place-items:center;margin:10px auto 14px;box-shadow:0 5px 20px #0007,inset 0 0 0 3px #8b5e23}
-.coin.flip{animation:spin .7s ease-in-out}@keyframes spin{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(720deg) scale(1.08)}100%{transform:rotateY(1440deg) scale(1)}}
-.center{text-align:center}.muted{color:var(--muted)}.status{padding:10px 12px;background:#12141c;border-radius:10px;margin:10px 0;color:#e6d7b5}
-.stage-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.stage{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#202330;border:1px solid var(--line);padding:10px;border-radius:10px;min-height:55px}
-.stage.banned{opacity:.45;border-style:dashed}.stage.picked{border-color:var(--green);background:#1c3029}
-.stage-name{font-weight:650}.tag{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.log{list-style:none;margin:0;padding:0}.log li{padding:8px 0;border-bottom:1px solid #303342;color:#d7d9e2;font-size:13px}
-.log li:last-child{border:0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.hidden{display:none!important}.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rule{background:#12141c;border-radius:9px;padding:10px}.rule b{display:block;color:var(--accent);font-size:12px;margin-bottom:3px}
-footer{color:var(--muted);font-size:12px;text-align:center;margin-top:12px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}.stage-list{grid-template-columns:1fr}.rules{grid-template-columns:1fr 1fr}}
+:root {
+  color-scheme:dark;
+  --bg:#101116; --panel:#1a1c25; --line:#35394a;
+  --text:#f4f4f7; --muted:#a8adbd;
+  --gold:#d8a84e; --red:#d65d66; --green:#65bd91;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:radial-gradient(ellipse at top,#25202a,#101116 60%);
+  color:var(--text);font:15px/1.45 system-ui,sans-serif
+}
+main{max-width:1100px;margin:auto;padding:26px 18px 50px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:clamp(28px,5vw,42px);margin:5px 0;color:var(--gold)}
+h2{font-size:19px;margin:0 0 12px}
+.kicker{color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.sub,.muted{color:var(--muted)}
+.pill{border:1px solid var(--line);border-radius:30px;padding:6px 11px;color:var(--muted);font-size:12px}
+.card{background:linear-gradient(160deg,var(--panel),#171922);border:1px solid var(--line);border-radius:15px;padding:17px;margin:15px 0;box-shadow:0 10px 28px #0003}
+.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+.players{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+input{width:100%;background:#11131a;color:white;border:1px solid var(--line);padding:10px;border-radius:9px;font:inherit}
+.btn{border:1px solid var(--line);background:#252837;color:white;padding:10px 13px;border-radius:9px;font:inherit;font-weight:700;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--gold)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.primary{background:var(--gold);color:#17130b;border-color:var(--gold)}
+.danger{border-color:#713c46;color:#ffb2b7}
+.small{font-size:12px;padding:7px 10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.status{background:#12141c;padding:11px;border-radius:9px;color:#e6d7b5}
+.notice{background:#292417;border:1px solid #6b542b;color:#f2dba9;padding:12px;border-radius:10px;margin:15px 0}
+.coin{width:100px;height:100px;border-radius:50%;border:5px solid #e8c36c;background:radial-gradient(circle at 35% 30%,#fff0b4,#c18a32 65%,#6d4517);color:#3a260d;font-size:23px;font-weight:950;display:grid;place-items:center;margin:12px auto}
+.center{text-align:center}
+.stage-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stage{position:relative;overflow:hidden;border:2px solid var(--line);border-radius:11px;background:#202330;min-width:0}
+.stage-image{height:125px;background-image:url("/kodoku%20stages.avif");background-size:300% 300%;background-repeat:no-repeat;position:relative}
+.stage-image:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent,#0009)}
+.stage-info{padding:9px;display:flex;justify-content:space-between;align-items:center;gap:7px}
+.stage-name{font-weight:700;font-size:13px}
+.stage-kind{font-size:10px;color:var(--muted);text-transform:uppercase}
+.stage button{white-space:nowrap}
+.stage.banned{border-color:var(--red)}
+.stage.banned .stage-image:after{background:#a51e2b99}
+.stage.picked{border-color:var(--green);box-shadow:0 0 0 2px #65bd9140}
+.stage.picked .stage-image:after{background:#167b4d66}
+.log{list-style:none;padding:0;margin:0}
+.log li{padding:8px 0;border-bottom:1px solid #303342;font-size:13px;color:#d7d9e2}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rule{background:#12141c;border-radius:9px;padding:10px;font-size:13px}
+.rule b{display:block;color:var(--gold);font-size:11px;margin-bottom:3px}
+.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.stage-list{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.stage-list{grid-template-columns:1fr}}
 </style>
 </head>
-<body><main>
-<div class="top"><div><div class="kicker">Tournament tool · Parsec</div><h1>SMASH KODOKU</h1><div class="sub">Interactive stage striking room</div></div><span class="pill">Best of 3 · Standard DSR</span></div>
-<div class="notice"><b>Prototype mode:</b> This page works in one browser and saves state locally. It is not yet synchronized between two players on separate devices. Do not use it as a live shared match room until hosted with a realtime backend.</div>
-<div class="grid">
-<section>
-<div class="card"><h2>1 · Players</h2><div class="players">
-<div><label for="p1">Player A</label><input id="p1" value="Player A"></div>
-<div><label for="p2">Player B</label><input id="p2" value="Player B"></div></div>
-<div class="actions"><button class="btn primary" id="newMatch">Start / reset match</button></div></div>
-<div class="card center"><h2>2 · Game 1 coin toss</h2><p class="muted">Players call heads or tails. The winner strikes first.</p>
-<div class="coin" id="coin">?</div>
-<div class="players"><button class="btn" id="heads">Heads</button><button class="btn" id="tails">Tails</button></div>
-<p id="coinResult" class="status">Choose heads or tails to flip the coin.</p></div>
-<div class="card"><div class="top"><h2>3 · Current game</h2><span class="pill" id="gameLabel">Game 1</span></div>
-<p id="turnText" class="status">Flip the coin to begin.</p><div id="stageList" class="stage-list"></div>
-<div class="actions"><button class="btn small" id="nextGame" disabled>Advance to next game</button><button class="btn small danger" id="undo">Undo last action</button></div></div>
-</section>
-<aside>
-<div class="card"><h2>Match rules</h2><div class="rules">
-<div class="rule"><b>GAME 1</b>1–2–1 strikes</div><div class="rule"><b>GAMES 2–3</b>Winner bans 3</div>
-<div class="rule"><b>COUNTERPICK</b>Loser chooses</div><div class="rule"><b>DSR</b>Enabled</div></div>
-<p class="muted" style="font-size:12px;margin:12px 0 0">Game 1 starters: Battlefield, Small Battlefield, Final Destination, Smashville, Pokémon Stadium 2.</p></div>
-<div class="card"><h2>Action history</h2><ul id="log" class="log"><li>Match ready. Enter player names and flip the coin.</li></ul></div>
-<div class="card"><h2>Stage pool</h2><div class="tag">Counterpicks used in games 2–3</div><p class="muted" style="font-size:13px;margin-bottom:0">Kalos Pokémon League · Hollow Bastion · Town &amp; City</p></div>
-<div class="card"><h2>Reset</h2><p class="muted" style="font-size:13px">Reset clears the local match history and stage state.</p><button class="btn danger" id="fullReset">Reset everything</button></div>
-</aside></div>
-<footer>Smash Kodoku · Community tournament tool</footer></main>
+<body>
+<main>
+  <div class="top">
+    <div>
+      <div class="kicker">Tournament tool · Parsec</div>
+      <h1>SMASH KODOKU</h1>
+      <div class="sub">Interactive stage striking room</div>
+    </div>
+    <span class="pill">Best of 3 · Standard DSR</span>
+  </div>
+
+  <div class="notice" id="connection">Create a match room to begin. Share its link with your opponent.</div>
+
+  <div class="card">
+    <h2>Match room</h2>
+    <div class="actions">
+      <button class="btn primary" id="createRoom">Create new room</button>
+      <button class="btn" id="copyLink" disabled>Copy room link</button>
+      <button class="btn danger" id="resetMatch" disabled>Reset match</button>
+    </div>
+    <p class="muted" id="roomInfo">No room created yet.</p>
+  </div>
+
+  <div class="grid">
+    <section>
+      <div class="card">
+        <h2>1 · Players</h2>
+        <div class="players">
+          <div><label for="p1">Player A</label><input id="p1" value="Player A"></div>
+          <div><label for="p2">Player B</label><input id="p2" value="Player B"></div>
+        </div>
+        <button class="btn small" id="saveNames" style="margin-top:10px" disabled>Save player names</button>
+      </div>
+
+      <div class="card center">
+        <h2>2 · Game 1 coin toss</h2>
+        <p class="muted">Both players call heads or tails.</p>
+        <div class="coin" id="coin">?</div>
+        <div class="players">
+          <div>
+            <p id="callA">Player A</p>
+            <button class="btn" id="headsA" disabled>Heads</button>
+            <button class="btn" id="tailsA" disabled>Tails</button>
+          </div>
+          <div>
+            <p id="callB">Player B</p>
+            <button class="btn" id="headsB" disabled>Heads</button>
+            <button class="btn" id="tailsB" disabled>Tails</button>
+          </div>
+        </div>
+        <p id="coinResult" class="status">Waiting for both players to call.</p>
+      </div>
+
+      <div class="card">
+        <div class="top">
+          <h2>3 · Stage selection</h2>
+          <span class="pill" id="gameLabel">Game 1</span>
+        </div>
+        <p id="turnText" class="status">Create a room to begin.</p>
+        <div id="stageList" class="stage-list"></div>
+      </div>
+
+      <div class="card hidden" id="winnerCard">
+        <h2>Who won this game?</h2>
+        <p class="muted">Record the result to begin the next game's stage striking.</p>
+        <div class="players">
+          <button class="btn primary" id="winnerA">Player A won</button>
+          <button class="btn primary" id="winnerB">Player B won</button>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h2>Match rules</h2>
+        <div class="rules">
+          <div class="rule"><b>GAME 1</b>1 ban → 2 bans → pick</div>
+          <div class="rule"><b>GAMES 2–3</b>Winner bans 3</div>
+          <div class="rule"><b>COUNTERPICK</b>Loser chooses</div>
+          <div class="rule"><b>DSR</b>Enabled</div>
+        </div>
+        <p class="muted" style="font-size:12px;margin-bottom:0">Game 1 uses the five starters. Games 2 and 3 use all eight legal stages.</p>
+      </div>
+
+      <div class="card">
+        <h2>Action history</h2>
+        <ul id="log" class="log"><li>Match ready.</li></ul>
+      </div>
+
+      <div class="card">
+        <h2>Legal stages</h2>
+        <p class="muted" style="font-size:13px">Battlefield · Small Battlefield · Final Destination · Smashville · Pokémon Stadium 2 · Kalos Pokémon League · Town &amp; City · Hollow Bastion</p>
+        <p class="muted" style="font-size:12px">Yoshi’s Story is not part of this stage selection.</p>
+      </div>
+    </aside>
+  </div>
+  <footer>Smash Kodoku · Community tournament tool</footer>
+</main>
+
 <script>
-const starters=["Battlefield","Small Battlefield","Final Destination","Smashville","Pokémon Stadium 2"];
-const counters=["Kalos Pokémon League","Hollow Bastion","Town & City"];
-let game=1, coinWinner=null, coinSide=null, actions=[], banned=[], picked=null, phase="coin", strikeStep=0, currentTurn=null, lastGameWinner=null, previousStages=[];
-const $=id=>document.getElementById(id);
-const name=p=>$(p==="A"?"p1":"p2").value.trim()||(p==="A"?"Player A":"Player B");
-function log(s){actions.push(s);renderLog()}
-function renderLog(){$("log").innerHTML=actions.length?actions.slice().reverse().map(x=>`<li>${esc(x)}</li>`).join(""):"<li>No actions yet.</li>"}
-function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function pool(){return game===1?starters:[...starters,...counters]}
-function bannedCount(){return banned.length}
-function activePlayer(){return currentTurn}
+/* Add your Supabase Project URL and Publishable Key below. */
+const SUPABASE_URL = "https://ttrswxjoivufwejjxkun.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ny6ylZkvTpx1ysC_B2fuTg_Do2oioMe";
+
+const starters = [
+  "Battlefield","Small Battlefield","Final Destination",
+  "Smashville","Pokémon Stadium 2"
+];
+const counters = [
+  "Kalos Pokémon League","Town & City","Hollow Bastion"
+];
+const stages = [
+  {name:"Battlefield",kind:"Starter",x:0,y:0},
+  {name:"Small Battlefield",kind:"Starter",x:1,y:0},
+  {name:"Final Destination",kind:"Starter",x:2,y:0},
+  {name:"Pokémon Stadium 2",kind:"Starter",x:1,y:1},
+  {name:"Smashville",kind:"Starter",x:2,y:1},
+  {name:"Kalos Pokémon League",kind:"Counterpick",x:0,y:2},
+  {name:"Town & City",kind:"Counterpick",x:1,y:2},
+  {name:"Hollow Bastion",kind:"Counterpick",x:2,y:2}
+];
+
+const $ = id => document.getElementById(id);
+let roomCode = null;
+let accessToken = null;
+let state = null;
+let polling = null;
+let busy = false;
+
+function initialState(){
+  return {
+    players:["Player A","Player B"],
+    game:1,
+    phase:"coin",
+    coinCalls:[null,null],
+    coinResult:null,
+    coinWinner:null,
+    currentTurn:null,
+    strikeStep:0,
+    banned:[],
+    picked:null,
+    previousStages:[],
+    lastWinner:null,
+    log:["Match created."]
+  };
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+function player(p){return state.players[p==="A"?0:1]||("Player "+p);}
+function other(p){return p==="A"?"B":"A";}
+function rpcHeaders(){
+  return {
+    "apikey":SUPABASE_KEY,
+    "Authorization":"Bearer "+SUPABASE_KEY,
+    "Content-Type":"application/json"
+  };
+}
+async function rpc(name,body){
+  const response = await fetch(SUPABASE_URL+"/rest/v1/rpc/"+name,{
+    method:"POST",headers:rpcHeaders(),body:JSON.stringify(body)
+  });
+  const data = await response.json().catch(()=>null);
+  if(!response.ok) throw new Error(data?.message||data?.hint||"Supabase request failed.");
+  return data;
+}
+function setNotice(message,error=false){
+  $("connection").textContent=message;
+  $("connection").style.borderColor=error?"#d65d66":"#6b542b";
+}
+function getRoomFromURL(){
+  const params=new URLSearchParams(location.hash.slice(1));
+  return {room:params.get("room"),token:params.get("token")};
+}
+async function createRoom(){
+  if(busy)return;
+  busy=true;
+  try{
+    if(SUPABASE_URL.includes("PASTE_")||SUPABASE_KEY.includes("PASTE_")){
+      throw new Error("Add your Supabase Project URL and Publishable Key in the code first.");
+    }
+    roomCode=Array.from(crypto.getRandomValues(new Uint8Array(4)))
+      .map(x=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[x%32]).join("");
+    accessToken=Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(x=>x.toString(16).padStart(2,"0")).join("");
+    state=initialState();
+    await rpc("smash_create_match",{
+      p_room_code:roomCode,p_access_token:accessToken,p_state:state
+    });
+    history.replaceState(null,"",location.pathname+"#room="+roomCode+"&token="+accessToken);
+    afterConnect();
+    setNotice("Room created. Copy the room link and send it to your opponent.");
+    render();
+    startPolling();
+  }catch(e){setNotice(e.message,true);}
+  finally{busy=false;}
+}
+async function joinRoom(room,token){
+  if(!room||!token)return false;
+  roomCode=room;accessToken=token;
+  try{
+    const data=await rpc("smash_get_match",{
+      p_room_code:roomCode,p_access_token:accessToken
+    });
+    state=Array.isArray(data)?data[0]?.state:data?.state;
+    if(!state)throw new Error("Room not found.");
+    afterConnect();
+    setNotice("Connected to room "+roomCode+". Match updates are shared.");
+    render();startPolling();
+    return true;
+  }catch(e){
+    setNotice("Could not join room: "+e.message,true);
+    return false;
+  }
+}
+function afterConnect(){
+  $("copyLink").disabled=false;
+  $("resetMatch").disabled=false;
+  $("saveNames").disabled=false;
+  $("roomInfo").textContent="Room code: "+roomCode;
+}
+async function fetchState(){
+  const data=await rpc("smash_get_match",{
+    p_room_code:roomCode,p_access_token:accessToken
+  });
+  return Array.isArray(data)?data[0]?.state:data?.state;
+}
+async function saveState(){
+  await rpc("smash_update_match",{
+    p_room_code:roomCode,p_access_token:accessToken,p_state:state
+  });
+  render();
+}
+async function refreshState(){
+  if(!roomCode||busy)return;
+  try{
+    const fresh=await fetchState();
+    if(fresh){state=fresh;render();}
+  }catch(e){setNotice("Connection issue: "+e.message,true);}
+}
+function startPolling(){
+  if(polling)clearInterval(polling);
+  polling=setInterval(refreshState,1500);
+}
+async function changeState(change){
+  if(!roomCode||busy)return;
+  busy=true;
+  try{
+    const fresh=await fetchState();
+    if(fresh)state=fresh;
+    change();
+    await saveState();
+  }catch(e){setNotice(e.message,true);}
+  finally{busy=false;}
+}
+function addLog(message){
+  state.log.push(message);
+  if(state.log.length>60)state.log=state.log.slice(-60);
+}
 function render(){
- $("gameLabel").textContent="Game "+game;
- $("turnText").textContent=phase==="coin"?"Flip the coin to begin.":phase==="strike"?`${name(currentTurn)}: ban ${game===1?[1,2,1][strikeStep]:3} stage${(game===1?[1,2,1][strikeStep]:3)>1?"s":""}.`:phase==="pick"?`${name(currentTurn)}: choose a legal counterpick.`:phase==="done"?`Stage selected: ${picked}.`:"Match complete.";
- $("stageList").innerHTML=pool().map(s=>{let state=banned.includes(s)?"banned":picked===s?"picked":"";
- let can=phase==="strike"&&currentTurn||phase==="pick"&&currentTurn;
- let label=state==="banned"?"BANNED":state==="picked"?"SELECTED":phase==="strike"?"Ban":phase==="pick"?"Pick":"—";
- let disabled=!can||!!state||(phase==="pick"&&game>1&&!counters.includes(s)&&!starters.includes(s))||(phase==="pick"&&previousStages.includes(s));
- return `<div class="stage ${state}"><div><div class="stage-name">${esc(s)}</div><div class="tag">${state||"stage"}</div></div><button class="btn small ${phase==="pick"?"primary":"danger"}" ${disabled?"disabled":""} data-stage="${esc(s)}">${label}</button></div>`}).join("");
- $("stageList").querySelectorAll("button[data-stage]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.stage)));
- $("nextGame").disabled=!(phase==="done"&&game<3);
- $("heads").disabled=$("tails").disabled=phase!=="coin";
+  if(!state)return;
+  $("p1").value=state.players[0];
+  $("p2").value=state.players[1];
+  $("callA").textContent=player("A");
+  $("callB").textContent=player("B");
+  $("gameLabel").textContent="Game "+state.game;
+  $("coin").textContent=state.coinResult?state.coinResult.toUpperCase():"?";
+  $("coinResult").textContent=state.coinWinner
+    ?state.coinResult.toUpperCase()+"! "+player(state.coinWinner)+" wins the toss."
+    :"Waiting for both players to call heads or tails.";
+  $("headsA").disabled=$("tailsA").disabled=!!state.coinCalls[0]||state.phase!=="coin";
+  $("headsB").disabled=$("tailsB").disabled=!!state.coinCalls[1]||state.phase!=="coin";
+  $("headsA").disabled=$("headsA").disabled||!roomCode;
+  $("tailsA").disabled=$("tailsA").disabled||!roomCode;
+  $("headsB").disabled=$("headsB").disabled||!roomCode;
+  $("tailsB").disabled=$("tailsB").disabled||!roomCode;
+
+  let message="";
+  if(state.phase==="coin")message="Both players must call heads or tails.";
+  if(state.phase==="g1strikes"){
+    message=player(state.currentTurn)+" must ban "+(state.strikeStep===0?1:2)+" starter stage"+(state.strikeStep===0?"":"s")+".";
+  }
+  if(state.phase==="g1pick")message=player(state.currentTurn)+" chooses one of the two remaining starters.";
+  if(state.phase==="strikes")message=player(state.currentTurn)+" must ban 3 stages.";
+  if(state.phase==="pick")message=player(state.currentTurn)+" chooses a stage. Previously selected stages are blocked by DSR.";
+  if(state.phase==="done")message="Selected stage: "+state.picked+". Record the game winner below.";
+  if(state.phase==="complete")message="Match complete!";
+  $("turnText").textContent=message;
+
+  const available=state.game===1?starters:stages.map(s=>s.name);
+  $("stageList").innerHTML=stages.filter(s=>available.includes(s.name)).map(s=>{
+    const banned=state.banned.includes(s.name);
+    const picked=state.picked===s.name;
+    const blocked=state.phase==="pick"&&state.previousStages.includes(s.name);
+    const active=["g1strikes","g1pick","strikes","pick"].includes(state.phase);
+    const isBan=["g1strikes","strikes"].includes(state.phase);
+    const disabled=!active||banned||picked||blocked;
+    const label=banned?"BANNED":picked?"SELECTED":blocked?"DSR":isBan?"BAN":state.phase==="g1pick"||state.phase==="pick"?"PICK":"—";
+    return `<div class="stage ${banned?"banned":picked?"picked":""}">
+      <div class="stage-image" style="background-position:${s.x*50}% ${s.y*50}%"></div>
+      <div class="stage-info">
+        <div><div class="stage-name">${escapeHTML(s.name)}</div><div class="stage-kind">${s.kind}</div></div>
+        <button class="btn small ${isBan?"danger":"primary"}" data-stage="${escapeHTML(s.name)}" ${disabled?"disabled":""}>${label}</button>
+      </div></div>`;
+  }).join("");
+  $("stageList").querySelectorAll("[data-stage]").forEach(b=>{
+    b.onclick=()=>chooseStage(b.dataset.stage);
+  });
+  $("winnerCard").classList.toggle("hidden",state.phase!=="done");
+  $("winnerA").textContent=player("A")+" won";
+  $("winnerB").textContent=player("B")+" won";
+  $("winnerA").disabled=$("winnerB").disabled=state.phase!=="done";
+  $("log").innerHTML=state.log.slice().reverse().map(x=>"<li>"+escapeHTML(x)+"</li>").join("");
 }
-function act(stage){
- if(phase==="strike"){
-  const needed=game===1?[1,2,1][strikeStep]:3;
-  if(banned.includes(stage)||banned.length>=needed+(game===1?0:0))return;
-  banned.push(stage);log(`${name(currentTurn)} banned ${stage}.`);
-  if(game===1){let count=[1,2,1][strikeStep];let totalForTurn=actions.filter(x=>x.startsWith(name(currentTurn)+" banned ")).length;let expected=count;
-    let made=0;for(let i=actions.length-1;i>=0&&actions[i].startsWith(name(currentTurn)+" banned ");i--)made++;
-    if(made>=expected){strikeStep++;if(strikeStep===3){let remain=starters.filter(s=>!banned.includes(s));if(remain.length===1){picked=remain[0];phase="done";log(`${picked} is the remaining starter and is selected.`)}else{phase="done";picked=remain[0];log(`${picked} selected as remaining starter.`)}}else currentTurn=coinWinner==="A"?(strikeStep===1?"B":"A"):(strikeStep===1?"A":"B");}
-  }else{if(banned.length===3){phase="pick";currentTurn=lastGameWinner==="A"?"B":"A";log(`${name(currentTurn)} chooses a counterpick.`)}}
- }else if(phase==="pick"){
-  if(previousStages.includes(stage)){alert("DSR: this stage was already played and cannot be selected.");return}
-  picked=stage;phase="done";log(`${name(currentTurn)} selected ${stage}.`);
- }
- render();
+async function callCoin(p,side){
+  await changeState(()=>{
+    if(state.phase!=="coin"||state.coinCalls[p==="A"?0:1])return;
+    state.coinCalls[p==="A"?0:1]=side;
+    addLog(player(p)+" called "+side+".");
+    if(state.coinCalls[0]&&state.coinCalls[1]){
+      state.coinResult=Math.random()<.5?"heads":"tails";
+      state.coinWinner=state.coinCalls[0]===state.coinResult?"A":"B";
+      state.currentTurn=state.coinWinner;
+      state.phase="g1strikes";
+      addLog(state.coinResult.toUpperCase()+". "+player(state.coinWinner)+" wins the toss and bans one starter.");
+    }
+  });
 }
-function toss(side){
- if(phase!=="coin")return;
- coinSide=side;let result=Math.random()<.5?"heads":"tails";coinWinner=result===side?"A":"B";
- $("coin").textContent=result.toUpperCase();$("coin").classList.remove("flip");void $("coin").offsetWidth;$("coin").classList.add("flip");
- $("coinResult").textContent=`${result.toUpperCase()}! ${name(coinWinner)} wins the toss and strikes first.`;
- currentTurn=coinWinner;phase="strike";strikeStep=0;log(`Coin toss: ${result}. ${name(coinWinner)} wins and strikes first.`);render();
+async function chooseStage(stage){
+  await changeState(()=>{
+    if(state.banned.includes(stage)||state.picked)return;
+    if(state.phase==="g1strikes"){
+      if(!starters.includes(stage))return;
+      state.banned.push(stage);
+      addLog(player(state.currentTurn)+" banned "+stage+".");
+      if(state.strikeStep===0){
+        state.strikeStep=1;
+        state.currentTurn=other(state.coinWinner);
+      }else{
+        state.phase="g1pick";
+        state.currentTurn=state.coinWinner;
+      }
+    }else if(state.phase==="g1pick"){
+      const remaining=starters.filter(s=>!state.banned.includes(s));
+      if(!remaining.includes(stage))return;
+      state.picked=stage;state.phase="done";
+      addLog(player(state.currentTurn)+" selected "+stage+".");
+    }else if(state.phase==="strikes"){
+      if(state.game===1)return;
+      state.banned.push(stage);
+      addLog(player(state.currentTurn)+" banned "+stage+".");
+      if(state.banned.length===3){
+        state.phase="pick";
+        state.currentTurn=other(state.lastWinner);
+        addLog(player(state.currentTurn)+" chooses from the remaining stages.");
+      }
+    }else if(state.phase==="pick"){
+      if(state.previousStages.includes(stage))return;
+      state.picked=stage;state.phase="done";
+      addLog(player(state.currentTurn)+" selected "+stage+".");
+    }
+  });
 }
-function resetGame(n){game=n;banned=[];picked=null;strikeStep=0;phase="strike";currentTurn=lastGameWinner;render();log(`Game ${game}: ${name(lastGameWinner)} bans three stages.`)}
-$("heads").onclick=()=>toss("heads");$("tails").onclick=()=>toss("tails");
-$("newMatch").onclick=()=>{game=1;coinWinner=null;coinSide=null;actions=[];banned=[];picked=null;phase="coin";strikeStep=0;currentTurn=null;lastGameWinner=null;previousStages=[];$("coin").textContent="?";$("coinResult").textContent="Choose heads or tails to flip the coin.";renderLog();render()};
-$("nextGame").onclick=()=>{if(phase!=="done"||game>=3)return;previousStages.push(picked);let winner=prompt("Who won Game "+game+"? Enter A or B.");if(!winner||!["A","B"].includes(winner.trim().toUpperCase()))return;lastGameWinner=winner.trim().toUpperCase();resetGame(game+1)};
-$("undo").onclick=()=>{if(!actions.length)return;actions.pop();alert("History entry removed. For a fully consistent reset after an incorrect action, use Start / reset match.");renderLog()};
-$("fullReset").onclick=()=>$("newMatch").click();
-render();
-</script></body></html>
+async function recordWinner(winner){
+  await changeState(()=>{
+    if(state.phase!=="done")return;
+    addLog(player(winner)+" won Game "+state.game+".");
+    if(state.game===3){
+      state.phase="complete";
+      addLog("Match complete!");
+      return;
+    }
+    state.lastWinner=winner;
+    state.previousStages.push(state.picked);
+    state.game++;
+    state.banned=[];
+    state.picked=null;
+    state.strikeStep=0;
+    state.currentTurn=winner;
+    state.phase="strikes";
+    addLog("Game "+state.game+": "+player(winner)+" bans three stages.");
+  });
+}
+async function saveNames(){
+  const a=$("p1").value.trim()||"Player A";
+  const b=$("p2").value.trim()||"Player B";
+  await changeState(()=>{
+    state.players=[a,b];
+    addLog("Player names updated.");
+  });
+}
+async function resetMatch(){
+  if(!confirm("Reset this match for both players?"))return;
+  await changeState(()=>{
+    const names=state.players;
+    state=initialState();
+    state.players=names;
+    addLog("Match reset.");
+  });
+}
+$("createRoom").onclick=createRoom;
+$("copyLink").onclick=()=>navigator.clipboard.writeText(location.href).then(()=>setNotice("Room link copied. Send it to your opponent."));
+$("resetMatch").onclick=resetMatch;
+$("saveNames").onclick=saveNames;
+$("headsA").onclick=()=>callCoin("A","heads");
+$("tailsA").onclick=()=>callCoin("A","tails");
+$("headsB").onclick=()=>callCoin("B","heads");
+$("tailsB").onclick=()=>callCoin("B","tails");
+$("winnerA").onclick=()=>recordWinner("A");
+$("winnerB").onclick=()=>recordWinner("B");
+
+const existing=getRoomFromURL();
+if(existing.room&&existing.token)joinRoom(existing.room,existing.token);
+</script>
+</body>
+</html>
