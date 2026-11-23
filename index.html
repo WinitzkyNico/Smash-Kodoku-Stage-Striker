@@ -99,7 +99,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:25px}
 
       <div class="card center">
         <h2>2 · Game 1 coin toss</h2>
-        <p class="muted">Both players call heads or tails.</p>
+        <p class="muted">Each player can only use their own controls.</p>
+        <div class="players" style="margin-bottom:12px">
+          <button class="btn small" id="roleA" type="button">I am Player A</button>
+          <button class="btn small" id="roleB" type="button">I am Player B</button>
+        </div>
+        <p class="muted" id="roleStatus">Choose which player you are using this device as.</p>
         <div class="coin" id="coin">?</div>
         <div class="players">
           <div>
@@ -191,6 +196,14 @@ let accessToken = null;
 let state = null;
 let polling = null;
 let busy = false;
+let localPlayer = null;
+function roleStorageKey(){return "smash-kodoku-role-"+roomCode;}
+function setPlayerRole(role){
+  if(role!=="A"&&role!=="B")return;
+  localPlayer=role;
+  if(roomCode)localStorage.setItem(roleStorageKey(),role);
+  render();
+}
 
 function initialState(){
   return {
@@ -255,6 +268,7 @@ async function createRoom(){
       p_room_code:roomCode,p_access_token:accessToken,p_state:state
     });
     history.replaceState(null,"",location.pathname+"#room="+roomCode+"&token="+accessToken);
+    setPlayerRole("A");
     afterConnect();
     setNotice("Room created. Copy the room link and send it to your opponent.");
     render();
@@ -271,6 +285,8 @@ async function joinRoom(room,token){
     });
     state=Array.isArray(data)?(data[0]?.state??data[0]):(data?.state??data);
     if(!state)throw new Error("Room not found.");
+    const savedRole=localStorage.getItem(roleStorageKey());
+    setPlayerRole(savedRole==="A"||savedRole==="B"?savedRole:"B");
     afterConnect();
     setNotice("Connected to room "+roomCode+". Match updates are shared.");
     render();startPolling();
@@ -335,8 +351,15 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("coinResult").textContent=state.coinWinner
     ?state.coinResult.toUpperCase()+"! "+player(state.coinWinner)+" wins the toss."
     :"Waiting for both players to call heads or tails.";
-  $("headsA").disabled=$("tailsA").disabled=!!state.coinCalls[0]||state.phase!=="coin";
-  $("headsB").disabled=$("tailsB").disabled=!!state.coinCalls[1]||state.phase!=="coin";
+  $("roleA").classList.toggle("primary",localPlayer==="A");
+  $("roleB").classList.toggle("primary",localPlayer==="B");
+  $("roleStatus").textContent=localPlayer
+    ?"This device is set to "+player(localPlayer)+"."
+    :"Choose which player you are using this device as.";
+  $("roleA").disabled=!roomCode;
+  $("roleB").disabled=!roomCode;
+  $("headsA").disabled=$("tailsA").disabled=!!state.coinCalls[0]||state.phase!=="coin"||localPlayer!=="A";
+  $("headsB").disabled=$("tailsB").disabled=!!state.coinCalls[1]||state.phase!=="coin"||localPlayer!=="B";
   $("headsA").disabled=$("headsA").disabled||!roomCode;
   $("tailsA").disabled=$("tailsA").disabled||!roomCode;
   $("headsB").disabled=$("headsB").disabled||!roomCode;
@@ -361,7 +384,7 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
     const blocked=state.phase==="pick"&&state.previousStages.includes(s.name);
     const active=["g1strikes","g1pick","strikes","pick"].includes(state.phase);
     const isBan=["g1strikes","strikes"].includes(state.phase);
-    const disabled=!active||banned||picked||blocked;
+    const disabled=!active||localPlayer!==state.currentTurn||banned||picked||blocked;
     const label=banned?"BANNED":picked?"SELECTED":blocked?"DSR":isBan?"BAN":state.phase==="g1pick"||state.phase==="pick"?"PICK":"—";
     return `<div class="stage ${banned?"banned":picked?"picked":""}">
       <div class="stage-image"><img src="${s.image}" alt="${escapeHTML(s.name)}" loading="lazy"></div>
@@ -380,8 +403,9 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
   $("log").innerHTML=state.log.slice().reverse().map(x=>"<li>"+escapeHTML(x)+"</li>").join("");
 }
 async function callCoin(p,side){
+  if(localPlayer!==p)return;
   await changeState(()=>{
-    if(state.phase!=="coin"||state.coinCalls[p==="A"?0:1])return;
+    if(state.phase!=="coin"||localPlayer!==p||state.coinCalls[p==="A"?0:1])return;
     state.coinCalls[p==="A"?0:1]=side;
     addLog(player(p)+" called "+side+".");
     if(state.coinCalls[0]&&state.coinCalls[1]){
@@ -394,8 +418,9 @@ async function callCoin(p,side){
   });
 }
 async function chooseStage(stage){
+  if(!localPlayer||localPlayer!==state.currentTurn)return;
   await changeState(()=>{
-    if(state.banned.includes(stage)||state.picked)return;
+    if(localPlayer!==state.currentTurn||state.banned.includes(stage)||state.picked)return;
    if(state.phase==="g1strikes"){
   if(!starters.includes(stage))return;
   state.banned.push(stage);
@@ -472,6 +497,8 @@ $("createRoom").onclick=createRoom;
 $("copyLink").onclick=()=>navigator.clipboard.writeText(location.href).then(()=>setNotice("Room link copied. Send it to your opponent."));
 $("resetMatch").onclick=resetMatch;
 $("saveNames").onclick=saveNames;
+$("roleA").onclick=()=>setPlayerRole("A");
+$("roleB").onclick=()=>setPlayerRole("B");
 $("headsA").onclick=()=>callCoin("A","heads");
 $("tailsA").onclick=()=>callCoin("A","tails");
 $("headsB").onclick=()=>callCoin("B","heads");
