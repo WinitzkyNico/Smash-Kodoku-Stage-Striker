@@ -41,8 +41,9 @@ input{width:100%;background:#11131a;color:white;border:1px solid var(--line);pad
 .center{text-align:center}
 .stage-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .stage{position:relative;overflow:hidden;border:2px solid var(--line);border-radius:11px;background:#202330;min-width:0}
-.stage-image{height:125px;background-image:url("/kodoku%20stages.avif");background-size:300% 300%;background-repeat:no-repeat;position:relative}
-.stage-image:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent,#0009)}
+.stage-image{height:125px;position:relative;overflow:hidden;background:#11131a}
+.stage-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.stage-image:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent,#0009);pointer-events:none}
 .stage-info{padding:9px;display:flex;justify-content:space-between;align-items:center;gap:7px}
 .stage-name{font-weight:700;font-size:13px}
 .stage-kind{font-size:10px;color:var(--muted);text-transform:uppercase}
@@ -174,14 +175,14 @@ const counters = [
   "Kalos Pokémon League","Town & City","Hollow Bastion"
 ];
 const stages = [
-  {name:"Battlefield",kind:"Starter",x:0,y:0},
-  {name:"Small Battlefield",kind:"Starter",x:1,y:0},
-  {name:"Final Destination",kind:"Starter",x:2,y:0},
-  {name:"Pokémon Stadium 2",kind:"Starter",x:1,y:1},
-  {name:"Smashville",kind:"Starter",x:2,y:1},
-  {name:"Kalos Pokémon League",kind:"Counterpick",x:0,y:2},
-  {name:"Town & City",kind:"Counterpick",x:1,y:2},
-  {name:"Hollow Bastion",kind:"Counterpick",x:2,y:2}
+  {name:"Battlefield",kind:"Starter",image:"https://images.wikidexcdn.net/mwuploads/esssbwiki/thumb/9/9f/latest/20180619102919/Campo_de_batalla_%281%29_SSBU.jpg/1200px-Campo_de_batalla_%281%29_SSBU.jpg"},
+  {name:"Small Battlefield",kind:"Starter",image:"https://cdn.mos.cms.futurecdn.net/7dtBbCZkRe8s3qL2pJyv8Z-1280-80.jpg"},
+  {name:"Final Destination",kind:"Starter",image:"https://vignette.wikia.nocookie.net/ssb/images/d/d4/SSBU_Final_Destination.jpg/revision/latest?cb=20181106215234"},
+  {name:"Pokémon Stadium 2",kind:"Starter",image:"https://cdn.wikiwiki.jp/to/w/ssbswitch/%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8/%E3%83%9D%E3%82%B1%E3%83%A2%E3%83%B3%E3%82%B9%E3%82%BF%E3%82%B8%E3%82%A2%E3%83%A02/%3A%3Aattach/%E3%83%9D%E3%82%B1%E3%83%A2%E3%83%B3%E3%82%B9%E3%82%BF%E3%82%B8%E3%82%A2%E3%83%A02.jpg?rev=a8efcb53a029dcb667157a6a607c64c6&t=20190413234237"},
+  {name:"Smashville",kind:"Starter",image:"https://ssb.wiki.gallery/images/thumb/1/13/SSBU_-_Smashville_at_dawn.jpg/1200px-SSBU_-_Smashville_at_dawn.jpg"},
+  {name:"Kalos Pokémon League",kind:"Counterpick",image:"https://poketouch.files.wordpress.com/2018/08/super_smash_bros_ultimate_screenshot_of_kalos_pokemon_league_stage.jpg"},
+  {name:"Town & City",kind:"Counterpick",image:"https://images.wikidexcdn.net/mwuploads/esssbwiki/4/49/latest/20180819210942/Sobrevolando_el_pueblo_%281%29_SSBU.jpg"},
+  {name:"Hollow Bastion",kind:"Counterpick",image:"https://www.ssbwiki.com/images/3/3f/SSBU-Hollow_BastionBattlefield.png"}
 ];
 
 const $ = id => document.getElementById(id);
@@ -363,7 +364,7 @@ if(document.activeElement.id !== "p2") $("p2").value=state.players[1];
     const disabled=!active||banned||picked||blocked;
     const label=banned?"BANNED":picked?"SELECTED":blocked?"DSR":isBan?"BAN":state.phase==="g1pick"||state.phase==="pick"?"PICK":"—";
     return `<div class="stage ${banned?"banned":picked?"picked":""}">
-      <div class="stage-image" style="background-position:${s.x*50}% ${s.y*50}%"></div>
+      <div class="stage-image"><img src="${s.image}" alt="${escapeHTML(s.name)}" loading="lazy"></div>
       <div class="stage-info">
         <div><div class="stage-name">${escapeHTML(s.name)}</div><div class="stage-kind">${s.kind}</div></div>
         <button class="btn small ${isBan?"danger":"primary"}" data-stage="${escapeHTML(s.name)}" ${disabled?"disabled":""}>${label}</button>
